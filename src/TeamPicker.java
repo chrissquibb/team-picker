@@ -2,26 +2,28 @@ import java.util.*;
 
 public class TeamPicker
 {
-    private int teamSize_;
     private Set<String> names_;
     private List<Set<String>> namesTogether_;
     private List<Set<String>> namesApart_;
 
-    public TeamPicker(int aInTeamSize, Set<String> aInNames,
-                      List<Set<String>> aInNamesTogether, List<Set<String>> aInNamesApart)
+    public TeamPicker(Set<String> aInNames, List<Set<String>> aInNamesTogether, List<Set<String>> aInNamesApart)
     {
-        teamSize_ = aInTeamSize;
         names_ = aInNames;
         namesTogether_ = aInNamesTogether;
         namesApart_ = aInNamesApart;
     }
 
-    public List<Set<String>> generateTeams()
+    public List<Set<String>> generateTeamsByTotalTeamCount(int aInTotalNumTeams)
+    {
+        return generateTeamsBySize(names_.size()/aInTotalNumTeams);
+    }
+
+    public List<Set<String>> generateTeamsBySize(int aInTeamSize)
     {
         List<Set<String>> lResult = new ArrayList<>();
         System.out.println("Generating teams from: " + getNames(names_));
         System.out.println("With the following conditions:");
-        System.out.println("\tTeam size: " + teamSize_);
+        System.out.println("\tTeam size: " + aInTeamSize);
         System.out.println("\tGrouped team members: " + getNames(namesTogether_));
         System.out.println("\tSeparated team members: " + getNames(namesApart_));
 
@@ -61,11 +63,11 @@ public class TeamPicker
 
         // Fill up the partial teams
         lResult.forEach(lPartialTeam -> {
-            if (lPartialTeam.size() < teamSize_)
+            if (lPartialTeam.size() < aInTeamSize)
             {
                 Collections.shuffle(lNames);
 
-                for (int i = lPartialTeam.size(); i < teamSize_ && !lNames.isEmpty(); ++i)
+                for (int i = lPartialTeam.size(); i < aInTeamSize && !lNames.isEmpty(); ++i)
                 {
                     lPartialTeam.add(lNames.remove(0));
                 }
@@ -75,18 +77,18 @@ public class TeamPicker
         // Do the rest of them
         while (!lNames.isEmpty())
         {
-            lResult.add(generateTeam(lNames));
+            lResult.add(generateTeam(lNames, aInTeamSize));
         }
 
         return lResult;
     }
 
-    private Set<String> generateTeam(List<String> aInNames)
+    private Set<String> generateTeam(List<String> aInNames, int aInTeamSize)
     {
         Collections.shuffle(aInNames);
 
         Set<String> lTeam = new HashSet<>();
-        for (int i = 0; i < teamSize_ && !aInNames.isEmpty(); ++i)
+        for (int i = 0; i < aInTeamSize && !aInNames.isEmpty(); ++i)
         {
             lTeam.add(aInNames.remove(0));
         }
@@ -132,7 +134,7 @@ public class TeamPicker
             add("P");add("Q");add("R");add("S");add("T");}};
 
         List<Set<String>> lTogetherNames = new ArrayList<>();
-        lTogetherNames.add(new HashSet<>(){{add("A"); add("B"); add("T");}});
+        lTogetherNames.add(new HashSet<>(){{add("A"); add("B");}});
         lTogetherNames.add(new HashSet<>(){{add("F"); add("S");}});
 
         List<Set<String>> lApartNames = new ArrayList<>();
@@ -140,9 +142,17 @@ public class TeamPicker
         lApartNames.add(new HashSet<>(){{add("P"); add("Q"); add("R");}});
 
 
-        TeamPicker lTeamPicker = new TeamPicker(3, lNames, lTogetherNames, lApartNames);
+        TeamPicker lTeamPicker = new TeamPicker(lNames, lTogetherNames, lApartNames);
 
-        for (Set<String> lTeam : lTeamPicker.generateTeams())
+        for (Set<String> lTeam : lTeamPicker.generateTeamsBySize(3))
+        {
+            StringBuilder lTeamSb = new StringBuilder();
+            lTeam.forEach(lTeamMember -> lTeamSb.append(lTeamMember).append(','));
+            lTeamSb.deleteCharAt(lTeamSb.length()-1);
+            System.out.println(lTeamSb.toString());
+        }
+
+        for (Set<String> lTeam : lTeamPicker.generateTeamsByTotalTeamCount(10))
         {
             StringBuilder lTeamSb = new StringBuilder();
             lTeam.forEach(lTeamMember -> lTeamSb.append(lTeamMember).append(','));
